@@ -1,0 +1,90 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: Dimension regroupant les informations clients nettoyées et dédupliquées, issues des tables ODS. 
+    columns:
+      - name: customer_id
+        description: Identifiant métier du client provenant du système source.
+        tests:
+          - not_null
+          - unique
+      
+      - name: customer_pk
+        description: Clé primaire technique unique du client dans le modèle dimensionnel.
+        tests:
+          - not_null
+          - unique
+      
+      - name: customer_state
+        description: Code de l'État ou de la région associé à l'adresse du client, utilisé pour les analyses géographiques et la segmentation régionale.    
+        tests:
+          - accepted_values: 
+              values:  ['PA','RO','ES','RR','RS','MG','AL','TO','PI','SC','PR','RJ','GO','CE','AP','MS','AC','TN','DF','PE','MT','SE','SP','BA','MA','PB','RN','AM']
+
+  - name: dim_products
+    description: Dimension centralisant les caractéristiques produits nettoyées et enrichies à partir des données ODS.
+    columns: 
+      - name: product_id
+        description: Identifiant produit du système source.
+        tests:
+          - not_null
+          - unique
+      
+      - name: product_pk
+        description: Clé primaire technique unique du produit dans le modèle dimensionnel.
+        tests:
+          - not_null
+          - unique
+      
+      - name: product_category_name
+        description: Catégorie à laquelle appartient le produit.
+        tests:
+          - not_null
+          - accepted_values: 
+              values:  ['relogios_presentes','fashion_bolsas_e_acessorios','eletrodomesticos','instrumentos_musicais','alimentos','bebes','eletrodomesticos_2','fashion_roupa_feminina','moveis_decoracao','fashion_underwear_e_moda_praia','audio','agro_industria_e_comercio','artigos_de_natal','moveis_quarto','moveis_cozinha_area_de_servico_jantar_e_jardim','seguros_e_servicos','informatica_acessorios','construcao_ferramentas_construcao','artes_e_artesanato','casa_construcao','sinalizacao_e_seguranca','livros_interesse_geral','market_place','climatizacao','cine_foto','tablets_impressao_imagem','brinquedos','perfumaria','automotivo','telefonia','utilidades_domesticas','construcao_ferramentas_ferramentas','construcao_ferramentas_seguranca','eletroportateis','eletronicos','portateis_casa_forno_e_cafe','casa_conforto','pcs','esporte_lazer','beleza_saude','moveis_sala','cool_stuff','ferramentas_jardim','industria_comercio_e_negocios','alimentos_bebidas','livros_tecnicos','telefonia_fixa','artes','artigos_de_festas','livros_importados','casa_conforto_2','cama_mesa_banho','UNKNOWN','pet_shop','fashion_calcados','fashion_esporte','construcao_ferramentas_jardim','construcao_ferramentas_iluminacao','cds_dvds_musicais','bebidas','papelaria','consoles_games','musica','flores','fashion_roupa_masculina','portateis_cozinha_e_preparadores_de_alimentos','moveis_colchao_e_estofado','fashion_roupa_infanto_juvenil','moveis_escritorio','la_cuisine','malas_acessorios','dvds_blu_ray','fraldas_higiene','pc_gamer']
+      
+      - name: product_length_cm
+        description: Longueur du produit en centimètres.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+              config:
+                where: "product_length_cm IS NOT NULL"
+      
+      - name: product_height_cm
+        description: Hauteur du produit en centimètres.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+              config:
+                where: "product_height_cm IS NOT NULL"
+      
+      - name: product_width_cm
+        description: Largeur du produit en centimètres.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+              config:
+                where: "product_width_cm IS NOT NULL"          
+
+  - name: dim_sellers        
+    description: Dimension regroupant les informations vendeurs nettoyées et harmonisées issues des tables ODS.
+    columns:  
+      - name: seller_id
+        description: Identifiant vendeur du système source.
+        tests:
+          - not_null
+          - unique
+      
+      - name: seller_pk
+        description: Clé primaire technique unique du vendeur dans le modèle dimensionnel.
+        tests:
+          - not_null
+          - unique
+      
+      - name: seller_state
+        description: Code de l'État ou de la région associé à l'adresse du vendeur, utilisé pour les analyses géographiques et la segmentation régionale.    
+        tests:
+          - accepted_values: 
+              values: ['RO','PA','ES','RS','MG','PI','SC','PR','RJ','GO','CE','MS','AC','PE','MT','DF','SE','SP','BA','MA','PB','RN','AM']

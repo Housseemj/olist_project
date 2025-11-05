@@ -1,0 +1,17 @@
+WITH ods_orders as 
+(
+    SELECT * FROM {{source('stg','stg_orders')}}
+)
+SELECT
+    ORDER_ID, 
+    CUSTOMER_ID, 
+    ORDER_STATUS, 
+    cast(ORDER_PURCHASE_TIMESTAMP as timestamp) as ORDER_PURCHASE_TIMESTAMP, 
+    ORDER_APPROVED_AT, 
+    ORDER_DELIVERED_CARRIER, 
+    cast(ORDER_DELIVERED_CUSTOMER_DATE as timestamp) as ORDER_DELIVERED_CUSTOMER_DATE, 
+    cast(ORDER_ESTIMATED_DELIVERY_DATE as timestamp) as ORDER_ESTIMATED_DELIVERY_DATE,
+    CURRENT_TIMESTAMP() AS created_at,
+    CURRENT_TIMESTAMP() AS updated_at
+FROM ods_orders
+WHERE ORDER_ID is not null and CUSTOMER_ID is not null

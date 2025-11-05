@@ -1,0 +1,211 @@
+version: 2
+
+models:
+  - name: mart_reviews
+    description: Table mart consolidant les avis clients sur les commandes. Chaque ligne correspond à une combinaison client-produit-vendeur-date et inclut les métriques d’évaluation permettant d’analyser la satisfaction client et les tendances dans le temps.
+    columns:
+      - name: date_day
+        description: Date correspondant au jour de l’avis, utilisée pour l’analyse temporelle des évaluations.
+        tests:
+          - not_null
+      - name: customer_pk
+        description: Clé primaire technique du client ayant laissé l’avis.
+        tests:
+          - not_null
+      - name: seller_pk
+        description: Clé primaire technique du vendeur associé au produit évalué.
+        tests:
+          - not_null
+      - name: product_pk
+        description: Clé primaire technique du produit évalué.
+        tests:
+          - not_null
+      - name: avg_review_score
+        description: Score moyen des avis pour le regroupement client-produit-vendeur-date.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "avg_review_score >= 1 AND avg_review_score <= 5"
+      - name: total_review
+        description: Nombre total d’avis pour ce regroupement.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "total_review >= 0"
+      - name: negative_reviews
+        description: Nombre d’avis considérés négatifs (score <= 3).
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "negative_reviews >= 0"
+      - name: positive_reviews
+        description: Nombre d’avis considérés positifs (score >= 4).
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "positive_reviews >= 0"
+      - name: pct_negative_reviews
+        description: Pourcentage d’avis négatifs sur le total des avis pour ce regroupement.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "pct_negative_reviews >= 0 AND pct_negative_reviews <= 100"
+          - pct_valid
+      - name: pct_positive_reviews
+        description: Pourcentage d’avis positifs sur le total des avis pour ce regroupement.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "pct_positive_reviews >= 0 AND pct_positive_reviews <= 100"
+          - pct_valid
+
+  - name: mart_customers
+    description: Table mart consolidant les informations clients à partir des commandes, paiements et articles commandés. Chaque ligne correspond à un client et inclut les indicateurs clés de performance, tels que le nombre de commandes, le total dépensé, la valeur moyenne des commandes, les taux d’annulation et les dates d’achat.
+    columns:
+      - name: customer_pk
+        description: Clé primaire technique unique du client.
+        tests:
+          - not_null
+          - unique
+      - name: total_orders
+        description: Nombre total de commandes passées par le client.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "total_orders >= 0"
+      - name: total_spent
+        description: Montant total dépensé par le client sur toutes ses commandes.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "total_spent >= 0"
+      - name: avg_order_value
+        description: Valeur moyenne d’une commande pour ce client.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "avg_order_value >= 0"
+      - name: pct_canceled_orders
+        description: Pourcentage de commandes annulées sur le total des commandes du client.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "pct_canceled_orders >= 0 AND pct_canceled_orders <= 100"
+          - pct_valid
+      - name: first_purchase_date
+        description: Date de la première commande passée par le client.
+        tests:
+          - not_null
+      - name: last_purchase_date
+        description: Date de la dernière commande passée par le client.
+        tests:
+          - not_null
+      - name: total_payment_value
+        description: Montant total des paiements effectués par le client.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "total_payment_value >= 0"
+      - name: avg_payment_value
+        description: Valeur moyenne d’un paiement pour ce client.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "avg_payment_value >= 0"
+
+
+  - name: mart_sales
+    description: Table mart consolidant les ventes par client, produit, vendeur et date. Chaque ligne correspond à une combinaison unique de client, produit, vendeur et date, avec les indicateurs de performance clés tels que nombre de commandes, valeur totale, valeur des frais, commandes annulées, livraisons à temps et délais moyens.
+    columns:
+      - name: date_day
+        description: Date de la commande, utilisée pour les analyses temporelles.
+        tests:
+          - not_null
+      - name: customer_pk
+        description: Clé primaire technique du client.
+        tests:
+          - not_null
+      - name: seller_pk
+        description: Clé primaire technique du vendeur.
+        tests:
+          - not_null
+      - name: product_pk
+        description: Clé primaire technique du produit.
+        tests:
+          - not_null
+      - name: total_orders
+        description: Nombre total de commandes pour cette combinaison client-produit-vendeur-date.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "total_orders >= 0"
+      - name: total_value
+        description: Valeur totale des commandes pour cette combinaison.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "total_value >= 0"
+      - name: total_freight_value
+        description: Somme des frais de livraison pour cette combinaison.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "total_freight_value >= 0"
+      - name: canceled_orders
+        description: Nombre de commandes annulées pour cette combinaison.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "canceled_orders >= 0"
+      - name: delivered_orders
+        description: Nombre de commandes livrées.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "delivered_orders >= 0"
+      - name: pct_delivered_on_time
+        description: Pourcentage de commandes livrées dans les délais.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "pct_delivered_on_time >= 0 AND pct_delivered_on_time <= 100"
+          - pct_valid
+      - name: avg_delivery_delay
+        description: Délai moyen de livraison en jours.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "avg_delivery_delay >= 0"
+      - name: avg_order_value
+        description: Valeur moyenne des commandes.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "avg_order_value >= 0"
+      - name: total_payment_value
+        description: Montant total des paiements reçus pour cette combinaison.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "total_payment_value >= 0"
+
+  - name: mart_delivery
+    description: Table mart consolidant les informations de livraison par vendeur, produit et date. Chaque ligne représente la combinaison unique vendeur-produit-date et contient des indicateurs clés tels que délai moyen de livraison, pourcentage de livraisons à temps, commandes annulées et livrées, ainsi que le nombre total de commandes.
+    columns:
+      - name: seller_pk
+        description: Clé primaire technique du vendeur.
+        tests:
+          - not_null
+      - name: product_pk
+        description: Clé primaire technique du produit.
+        tests:
+          - not_null
+      - name: date_day
+        description: Date de la commande, utilisée pour les analyses temporelles.
+        tests:
+          - not_null
+      - name: avg_delai_livraison
+        description: Délai moyen de livraison en jours pour la combinaison vendeur-produit-date.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "avg_delai_livraison >= 0"
+      - name: pct_delivered_on_time
+        description: Pourcentage de commandes livrées dans les délais (order_delivered_delay <= 0).
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "pct_delivered_on_time >= 0 AND pct_delivered_on_time <= 100"
+          - pct_valid
+      - name: canceled_orders
+        description: Nombre de commandes annulées pour la combinaison vendeur-produit-date.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "canceled_orders >= 0"
+      - name: delivered_orders
+        description: Nombre de commandes livrées pour cette combinaison.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "delivered_orders >= 0"
+      - name: total_orders
+        description: Nombre total de commandes pour cette combinaison vendeur-produit-date.
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "total_orders >= 0"

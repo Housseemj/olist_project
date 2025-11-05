@@ -1,0 +1,92 @@
+models:
+  - name: ods_customers
+    description: Table ODS contenant les informations clients brutes provenant des fichiers sources.
+    columns:
+      - name: customer_id
+        tests:
+          - unique: {}
+          - not_null: {}
+
+  - name: ods_geolocation
+    description: Table ODS stockant les données de géolocalisation (codes postaux, villes, états).
+    columns:
+      - name: GEOLOCATION_ZIP_CODE_PREFIX
+        tests:
+          - not_null: {}
+
+  - name: ods_orders_items
+    description: Table ODS des détails des commandes, associant produits et vendeurs à chaque commande.
+    columns:
+      - name: ORDER_ID
+        tests:
+          - not_null: {}
+      - name: ORDER_ITEM_ID
+        tests:
+          - unique: {}
+          - not_null: {}
+      - name: PRODUCT_ID
+        tests:
+          - not_null: {}
+      - name: SELLER_ID
+        tests:
+          - not_null: {}
+
+  - name: ods_orders_payments
+    description: Table ODS des paiements des commandes, incluant le montant et le type de paiement.
+    columns:
+      - name: ORDER_ID
+        tests:
+          - not_null: {}
+      - name: PAYMENT_VALUE
+        tests:
+          - not_null: {}
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+
+  - name: ods_orders_reviews
+    description: Table ODS contenant les avis et notes des clients pour chaque commande.
+    columns:
+      - name: REVIEW_ID
+        tests:
+          - unique: {}
+          - not_null: {}
+      - name: ORDER_ID
+        tests:
+          - not_null: {}
+      - name: REVIEW_SCORE
+        tests:
+          - not_null: {}
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+
+  - name: ods_orders
+    description: Table ODS consolidant les informations sur les commandes brutes.
+    columns:
+      - name: ORDER_ID
+        tests:
+          - unique: {}
+          - not_null: {}
+      - name: CUSTOMER_ID
+        tests:
+          - not_null: {}
+
+  - name: ods_products
+    description: Table ODS contenant les informations brutes sur les produits.
+    columns:
+      - name: PRODUCT_ID
+        tests:
+          - unique: {}
+          - not_null: {}
+
+  - name: ods_sellers
+    description: Table ODS contenant les informations brutes sur les vendeurs.
+    columns:
+      - name: SELLER_ID
+        tests:
+          - unique: {}
+          - not_null: {}
+
+
+
+
+  

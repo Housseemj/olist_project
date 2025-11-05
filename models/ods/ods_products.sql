@@ -1,0 +1,19 @@
+WITH ods_products AS 
+(
+    SELECT * FROM {{source('stg','stg_products')}}
+)
+
+SELECT
+    PRODUCT_ID,
+    PRODUCT_CATEGORY_NAME,
+    cast(PRODUCT_NAME_LENGHT as number) as PRODUCT_NAME_LENGHT,
+    PRODUCT_DESCRIPTION_LENGHT,
+    PRODUCT_PHOTOS_QTY,
+    PRODUCT_WEIGHT_G,
+    cast(PRODUCT_LENGTH_CM as float) as PRODUCT_LENGTH_CM ,
+    cast(PRODUCT_HEIGHT_CM as float) as PRODUCT_HEIGHT_CM,
+    cast(PRODUCT_WIDTH_CM as float) as PRODUCT_WIDTH_CM,
+    CURRENT_TIMESTAMP() AS created_at,
+    CURRENT_TIMESTAMP() AS updated_at
+FROM ods_products
+WHERE PRODUCT_ID IS NOT NULL 

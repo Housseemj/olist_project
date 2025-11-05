@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name : stg
+    database: OLIST_DB
+    schema: STAGING
+    tables:
+      - name: stg_customers
+      - name: stg_orders
+      - name: stg_orders_items
+      - name: stg_orders_payments
+      - name: stg_orders_reviews
+      - name: stg_products
+      - name: stg_seller
+      - name: stg_geolocation
+      - name: stg_product_category_name_translation
+

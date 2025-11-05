@@ -1,0 +1,86 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: >
+        Fact table consolidant les informations sur les commandes, en agrégeant les données des clients, produits, vendeurs et paiements pour permettre le calcul de métriques clés telles que le chiffre d’affaires, les délais de livraison et les taux d’annulation
+    columns: 
+      - name: order_delivered_delay
+        tests:
+        - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 30
+      - name: order_id
+        tests:
+        - unique: {}
+        - not_null: {}
+      - name: ORDER_STATUS
+        tests:
+        - accepted_values: 
+              values: ['CANCELED','DELIVERED']
+        - not_null: {}
+
+  - name: fct_orders_items      
+    description: >
+        Table de faits détaillant les lignes de commande (order items), reliant chaque commande aux produits et vendeurs correspondants. 
+        Elle permet d’analyser les ventes au niveau le plus granulaire (produit par commande) et de calculer des indicateurs tels que le chiffre d’affaires, les marges, les remises et les volumes vendus. 
+        Les données proviennent de la zone ODS et sont nettoyées, enrichies et harmonisées avant intégration.
+    columns:
+      - name: ORDER_ITEM_ID
+        tests: 
+        - unique: {}
+        - not_null: {}
+      - name: order_id  
+        tests: 
+        - not_null: {}
+      - name: PRODUCT_PK
+        tests:
+        - not_null: {}
+      - name: SELLER_PK
+        tests:
+        - not_null: {}  
+
+  - name: fct_orders_payments 
+    description: > 
+        Table de faits regroupant les informations relatives aux paiements des commandes. 
+        Chaque enregistrement correspond à une transaction de paiement associée à une commande donnée. 
+        Elle permet d’analyser les modes de paiement utilisés, les montants réglés, le nombre de versements et les comportements d’achat des clients. 
+        Les données sont issues de la zone ODS, nettoyées et normalisées avant leur intégration dans le modèle de faits.
+    columns:
+      - name: order_id
+        tests:
+          - not_null: {}
+      - name: PAYMENT_VALUE
+        tests:
+          - not_null: {}
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric   
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+              config:
+                where: "PAYMENT_VALUE IS NOT NULL"
+
+  - name: fct_orders_reviews
+    description: >
+        Table de faits consolidant les avis et évaluations laissés par les clients sur leurs commandes. 
+        Chaque ligne correspond à un avis sur une commande spécifique, incluant le score, le commentaire et la date de création. 
+        Elle permet d’analyser la satisfaction client, la qualité des produits et des vendeurs, ainsi que les tendances des évaluations dans le temps.
+    columns:
+      - name: REVIEW_ID
+        tests:
+          - not_null: {}
+          - unique: {}
+      - name: order_id
+        tests:
+          - not_null: {}
+      - name: customer_pk
+        tests:
+          - not_null: {}
+      - name: SELLER_PK
+        tests:
+          - not_null: {}
+      - name: REVIEW_SCORE
+        tests:
+          - not_null: {}
+          - accepted_values: 
+              values: [1,2,3,4,5]

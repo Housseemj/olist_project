@@ -1,0 +1,19 @@
+WITH ods_products_category AS
+(
+    SELECT * FROM {{source('stg','stg_product_category_name_translation')}}
+)
+
+SELECT
+    CASE 
+    WHEN PRODUCT_CATEGORY_NAME IS NULL 
+    THEN 'UNKOWN' 
+    ELSE PRODUCT_CATEGORY_NAME 
+    END as PRODUCT_CATEGORY_NAME, 
+    CASE 
+    WHEN PRODUCT_CATEGORY_NAME_ENGLISH IS NULL 
+    THEN 'UNKOWN' 
+    ELSE PRODUCT_CATEGORY_NAME_ENGLISH 
+    END as PRODUCT_CATEGORY_NAME_ENGLISH,
+    CURRENT_TIMESTAMP() AS created_at,
+    CURRENT_TIMESTAMP() AS updated_at
+FROM ods_products_category
