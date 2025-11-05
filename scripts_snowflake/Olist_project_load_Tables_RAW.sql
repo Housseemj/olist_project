@@ -1,0 +1,51 @@
+USE DATABASE OLIST_DB;
+USE SCHEMA OLIST_DB.RAW;
+
+CREATE OR REPLACE STAGE olist_stage FILE_FORMAT = (TYPE = CSV FIELD_OPTIONALLY_ENCLOSED_BY='"' SKIP_HEADER=1);
+
+LIST @olist_stage
+
+COPY INTO OLIST_DB.RAW.ORDERS_RAW
+FROM @olist_stage/olist_orders_dataset.csv.gz FILE_FORMAT =(TYPE=CSV SKIP_HEADER=1 FIELD_OPTIONALLY_ENCLOSED_BY='"' error_on_column_count_mismatch=false) ;
+
+SELECT * FROM OLIST_DB.RAW.ORDERS_RAW;
+
+COPY INTO OLIST_DB.RAW.CUSTOMERS_RAW
+FROM @olist_stage/olist_customers_dataset.csv.gz FILE_FORMAT =(TYPE=CSV SKIP_HEADER=1 FIELD_OPTIONALLY_ENCLOSED_BY='"' error_on_column_count_mismatch=false) ;
+
+SELECT * FROM OLIST_DB.RAW.CUSTOMERS_RAW;
+
+COPY INTO OLIST_DB.RAW.geolocation_raw
+FROM @olist_stage/olist_geolocation_dataset.csv.gz FILE_FORMAT =(TYPE=CSV SKIP_HEADER=1 FIELD_OPTIONALLY_ENCLOSED_BY='"' error_on_column_count_mismatch=false) ;
+
+SELECT * FROM OLIST_DB.RAW.geolocation_raw;
+
+COPY INTO OLIST_DB.RAW.ORDERS_ITEMS_RAW
+FROM @olist_stage/olist_order_items_dataset.csv.gz FILE_FORMAT =(TYPE=CSV SKIP_HEADER=1 FIELD_OPTIONALLY_ENCLOSED_BY='"' error_on_column_count_mismatch=false) ;
+
+SELECT * FROM OLIST_DB.RAW.ORDERS_ITEMS_RAW;
+
+COPY INTO OLIST_DB.RAW.ORDERS_PAYMENTS_RAW
+FROM @olist_stage/olist_order_payments_dataset.csv.gz FILE_FORMAT =(TYPE=CSV SKIP_HEADER=1 FIELD_OPTIONALLY_ENCLOSED_BY='"' error_on_column_count_mismatch=false) ;
+
+SELECT * FROM OLIST_DB.RAW.ORDERS_PAYMENTS_RAW;
+
+COPY INTO OLIST_DB.RAW.ORDERS_REVIEWS_RAW
+FROM @olist_stage/olist_order_reviews_dataset.csv.gz FILE_FORMAT =(TYPE=CSV SKIP_HEADER=1 FIELD_OPTIONALLY_ENCLOSED_BY='"' error_on_column_count_mismatch=false) ;
+
+SELECT * FROM OLIST_DB.RAW.ORDERS_REVIEWS_RAW;
+
+COPY INTO OLIST_DB.RAW.PRODUCTS_RAW
+FROM @olist_stage/olist_products_dataset.csv.gz FILE_FORMAT =(TYPE=CSV SKIP_HEADER=1 FIELD_OPTIONALLY_ENCLOSED_BY='"' error_on_column_count_mismatch=false) ;
+
+SELECT * FROM OLIST_DB.RAW.PRODUCTS_RAW;
+
+COPY INTO OLIST_DB.RAW.SELLER_RAW
+FROM @olist_stage/olist_sellers_dataset.csv.gz FILE_FORMAT =(TYPE=CSV SKIP_HEADER=1 FIELD_OPTIONALLY_ENCLOSED_BY='"' error_on_column_count_mismatch=false) ;
+
+SELECT * FROM OLIST_DB.RAW.SELLER_RAW;
+
+COPY INTO OLIST_DB.RAW.PRODUCT_CATEGORY_NAME_TRANSLATION_RAW
+FROM @olist_stage/product_category_name_translation.csv.gz FILE_FORMAT =(TYPE=CSV SKIP_HEADER=1 FIELD_OPTIONALLY_ENCLOSED_BY='"' error_on_column_count_mismatch=false) ;
+
+SELECT * FROM OLIST_DB.RAW.PRODUCT_CATEGORY_NAME_TRANSLATION_RAW;
